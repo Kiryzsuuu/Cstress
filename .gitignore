@@ -1,0 +1,23 @@
+# Node
+node_modules/
+
+# Vite / build outputs
+apps/web/dist/
+apps/web/.vite/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+apps/backend/.venv/
+
+# Env files / secrets
+.env
+apps/backend/.env
+
+# MediaPipe downloaded model
+apps/backend/models/*.task
+
+# OS/editor
+.DS_Store
+.vscode/

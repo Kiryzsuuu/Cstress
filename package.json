@@ -1,0 +1,22 @@
+{
+  "name": "cstress",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "concurrently -n backend,web -c magenta,cyan \"npm run dev:backend\" \"npm run dev:web\"",
+    "dev:web": "npm run dev -w @cstress/web",
+    "dev:backend": "powershell -NoProfile -ExecutionPolicy Bypass -File apps/backend/dev.ps1 -WithFace",
+    "build": "npm run build -w @cstress/web",
+    "lint": "npm run lint -w @cstress/web"
+  },
+  "workspaces": [
+    "apps/web"
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
