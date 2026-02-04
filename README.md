@@ -2,11 +2,34 @@
 
 Chat konsultasi dini (non-medis) untuk tingkat stres + ringkasan topik/kesimpulan, terhubung dengan real-time face tracking.
 
-## Stack
-- Frontend: React (Vite)
-- Backend: Python FastAPI
-  - Face tracking: OpenCV + MediaPipe (jalan lokal di mesin kamu)
-  - Chat: OpenAI API streaming via SSE
+## 🚀 Quick Start (One-Click)
+
+### Windows
+1. **Double-click** `START.bat` 
+2. Aplikasi akan otomatis:
+   - Install dependencies (first time only)
+   - Start backend server
+   - Start frontend server  
+   - Open browser
+
+Atau jalankan manual:
+```powershell
+.\start.ps1
+```
+
+### Manual Setup
+
+## Tech Stack
+- **Frontend**: React + TypeScript + Vite
+- **Backend**: Python FastAPI
+  - Face tracking: OpenCV + MediaPipe (lokal)
+  - AI Chat: OpenAI API (streaming via SSE)
+- **UI**: Comic book style dengan responsive design
+
+## Prerequisites
+- **Python 3.12+** → https://www.python.org/
+- **Node.js 18+** → https://nodejs.org/
+- **OpenAI API Key** → https://platform.openai.com/api-keys
 
 ## Setup
 

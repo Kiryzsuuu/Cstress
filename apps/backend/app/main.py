@@ -76,8 +76,11 @@ async def chat_stream(body: ChatStreamRequest):
             carry = ""
             analysis_started = False
             analysis_buffer = ""
+            full_response = ""  # Store entire response for fallback
 
             async for token in stream_chat(body.messages, body.faceSignals):
+                full_response += token  # Collect full response
+                
                 if analysis_started:
                     analysis_buffer += token
                     continue
@@ -109,7 +112,8 @@ async def chat_stream(body: ChatStreamRequest):
                 yield f"data: {json.dumps({'token': carry})}\n\n"
 
             # Try parse analysis JSON
-            if analysis_started:
+            analysis_sent = False
+            if analysis_started and analysis_buffer:
                 raw = analysis_buffer.strip()
                 print(f"[DEBUG] Analysis buffer received: {raw[:200]}...")  # Debug log
                 # Some models might add whitespace; ensure we parse the outermost object.
@@ -122,9 +126,42 @@ async def chat_stream(body: ChatStreamRequest):
                         print(f"[DEBUG] Successfully parsed analysis: {analysis}")  # Debug log
                         yield "event: analysis\n"
                         yield f"data: {json.dumps({'analysis': analysis})}\n\n"
+                        analysis_sent = True
                     except Exception as parse_err:
                         print(f"[ERROR] Failed to parse analysis JSON: {parse_err}")  # Debug log
-                        pass
+            
+            # FALLBACK: If no analysis was sent, try to extract from full response
+            if not analysis_sent:
+                print("[DEBUG] No analysis marker found, trying fallback extraction...")
+                # Try to find JSON in the last 1500 characters
+                tail = full_response[-1500:] if len(full_response) > 1500 else full_response
+                start = tail.rfind("{")
+                if start >= 0:
+                    json_candidate = tail[start:]
+                    # Try to find the closing brace
+                    brace_count = 0
+                    end_pos = -1
+                    for i, char in enumerate(json_candidate):
+                        if char == "{":
+                            brace_count += 1
+                        elif char == "}":
+                            brace_count -= 1
+                            if brace_count == 0:
+                                end_pos = i + 1
+                                break
+                    
+                    if end_pos > 0:
+                        json_str = json_candidate[:end_pos]
+                        try:
+                            analysis = json.loads(json_str)
+                            # Validate it has required fields
+                            if "topics" in analysis and "summary" in analysis:
+                                print(f"[DEBUG] Fallback extraction succeeded: {analysis}")
+                                yield "event: analysis\n"
+                                yield f"data: {json.dumps({'analysis': analysis})}\n\n"
+                                analysis_sent = True
+                        except Exception as fallback_err:
+                            print(f"[DEBUG] Fallback extraction failed: {fallback_err}")
 
             yield "event: done\n"
             yield f"data: {json.dumps({'ok': True})}\n\n"
