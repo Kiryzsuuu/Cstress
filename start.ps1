@@ -305,7 +305,7 @@ Press Ctrl+C to stop all servers...
     }
     
 } catch {
-    Write-Error-Custom $_.Exception.Message
+    Write-ColorOutput "`n✗ ERROR: $($_.Exception.Message)" -Color Red
     Write-Host $_.ScriptStackTrace -ForegroundColor Red
     exit 1
 }

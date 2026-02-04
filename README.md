@@ -4,20 +4,31 @@ Chat konsultasi dini (non-medis) untuk tingkat stres + ringkasan topik/kesimpula
 
 ## 🚀 Quick Start (One-Click)
 
-### Windows
-1. **Double-click** `START.bat` 
-2. Aplikasi akan otomatis:
-   - Install dependencies (first time only)
-   - Start backend server
-   - Start frontend server  
-   - Open browser
+### Windows - Cara Termudah! 🎯
 
-Atau jalankan manual:
+**Cukup double-click file `START.bat`** dan aplikasi langsung jalan!
+
+Script akan otomatis:
+- ✅ Cek Python & Node.js terinstall
+- ✅ Install dependencies (pertama kali saja)
+- ✅ Start backend server (port 8001)
+- ✅ Start frontend server (port 5173)
+- ✅ Buka browser otomatis
+- ✅ Setup .env file jika belum ada
+
+**Atau via PowerShell:**
 ```powershell
 .\start.ps1
 ```
 
-### Manual Setup
+**Berhenti:** Tekan `Ctrl+C` di terminal
+
+### Catatan Penting ⚠️
+- Pastikan sudah install **Python 3.12+** dan **Node.js 18+**
+- Saat pertama kali, script akan minta **OpenAI API Key**
+- Dapatkan API key dari: https://platform.openai.com/api-keys
+
+---
 
 ## Tech Stack
 - **Frontend**: React + TypeScript + Vite
