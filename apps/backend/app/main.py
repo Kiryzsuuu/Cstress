@@ -107,9 +107,12 @@ async def chat_stream(body: ChatStreamRequest):
                     yield f"data: {json.dumps({'token': visible})}\n\n"
 
             # Flush any remaining visible carry (only if marker never appeared)
+            # If analysis_started is True, carry should be empty anyway
             if carry and not analysis_started:
-                yield "event: token\n"
-                yield f"data: {json.dumps({'token': carry})}\n\n"
+                # Double check: don't send if marker is in carry
+                if ANALYSIS_MARKER not in carry:
+                    yield "event: token\n"
+                    yield f"data: {json.dumps({'token': carry})}\n\n"
 
             # Try parse analysis JSON
             analysis_sent = False

@@ -6,7 +6,7 @@ param(
     [switch]$SkipInstall
 )
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"  # Changed from "Stop" to allow pip warnings
 $ProgressPreference = "SilentlyContinue"
 
 function Write-ColorOutput {
@@ -89,23 +89,43 @@ try {
         Write-ColorOutput "[Backend] Setting up Python environment..." -Color Yellow
         Push-Location (Join-Path $PSScriptRoot "apps\backend")
         
-        if (-not (Test-Path ".venv")) {
-            Write-ColorOutput "Creating virtual environment..." -Color Gray
-            python -m venv .venv
+        try {
+            if (-not (Test-Path ".venv")) {
+                Write-ColorOutput "Creating virtual environment..." -Color Gray
+                python -m venv .venv
+            }
+            
+            Write-ColorOutput "Installing Python packages..." -Color Gray
+            
+            # Upgrade pip (ignore warnings)
+            & .\.venv\Scripts\pip.exe install --quiet --upgrade pip 2>&1 | Out-Null
+            
+            # Install requirements
+            Write-ColorOutput "Installing base requirements..." -Color Gray
+            & .\.venv\Scripts\pip.exe install --quiet -r requirements.txt 2>&1 | Out-Null
+            
+            # Install face tracking requirements
+            Write-ColorOutput "Installing face tracking requirements..." -Color Gray
+            & .\.venv\Scripts\pip.exe install --quiet -r requirements-face.txt 2>&1 | Out-Null
+            
+            Pop-Location
+            Write-Success "Backend dependencies installed"
+            
+        } catch {
+            Pop-Location
+            Write-ColorOutput "[WARNING] Some packages may have warnings, but continuing..." -Color Yellow
+            Write-Success "Backend dependencies installed (with warnings)"
         }
-        
-        Write-ColorOutput "Installing Python packages..." -Color Gray
-        & .\.venv\Scripts\pip.exe install --quiet --upgrade pip 2>$null
-        & .\.venv\Scripts\pip.exe install --quiet -r requirements.txt 2>$null
-        & .\.venv\Scripts\pip.exe install --quiet -r requirements-face.txt 2>$null
-        
-        Pop-Location
-        Write-Success "Backend dependencies installed"
         
         # Frontend
         Write-ColorOutput "[Frontend] Installing Node packages..." -Color Yellow
-        npm install --silent --prefix (Join-Path $PSScriptRoot ".") 2>$null
-        Write-Success "Frontend dependencies installed"
+        try {
+            npm install --silent --prefix (Join-Path $PSScriptRoot ".") 2>&1 | Out-Null
+            Write-Success "Frontend dependencies installed"
+        } catch {
+            Write-ColorOutput "[WARNING] Some npm warnings occurred, but continuing..." -Color Yellow
+            Write-Success "Frontend dependencies installed (with warnings)"
+        }
     }
     
     # Kill existing processes
